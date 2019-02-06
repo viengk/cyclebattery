@@ -108,6 +108,7 @@ def charge():
             timed_charge(csvfile)
         else:
             full_charge(csvfile)
+    time.sleep(CHARGE_COMPLETE_WAIT_TIME)
 
 def discharge():
     with open('data\\' + DISCHARGE_FILENAME + time_string() + '.csv', 'w') as csvfile:
@@ -117,6 +118,8 @@ def discharge():
             timed_discharge(csvfile)
         else:
             full_discharge(csvfile)
+    time.sleep(DISCHARGE_COMPLETE_WAIT_TIME)
+    
             
 power_supply = PowerSupply()
 electronic_load = ElectronicLoad()
@@ -142,19 +145,25 @@ USE_TIMED_CYCLE = get_setting('USE_TIMED_CYCLE')
 CHARGE_FIRST = get_setting('CHARGE_FIRST')
 TIMED_CHARGE_TIME = float(get_setting('TIMED_CHARGE_TIME'))
 TIMED_DISCHARGE_TIME = float(get_setting('TIMED_DISCHARGE_TIME'))
+CHARGE_COMPLETE_WAIT_TIME = float(get_setting('CHARGE_COMPLETE_WAIT_TIME'))
+DISCHARGE_COMPLETE_WAIT_TIME = float(get_setting('DISCHARGE_COMPLETE_WAIT_TIME'))
+NUMBER_CHARGES = int(get_setting('NUMBER_CHARGES'))
 
 set_up_power_supply()
 set_up_electronic_load()
 
 start_time = 0
 num_lines = 0
+cycle_number = 1
 
 if CHARGE_FIRST.lower() in TRUE_STRINGS:
-    while True:
+    while True and NUMBER_CHARGES != cycle_number:
+        cycle_number += 1
         charge()
         discharge()
 else:
-    while True:
+    while True and NUMBER_CHARGES != cycle_number:
+        cycle_number += 1
         discharge()
         charge()
 
