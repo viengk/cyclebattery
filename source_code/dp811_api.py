@@ -44,6 +44,4 @@ class PowerSupply(object):
     def off(self):
         self.write(':OUTP CH1, OFF')
 
-ps = PowerSupply()
-ps.set_voltage_current(3.68, 5.1)
 

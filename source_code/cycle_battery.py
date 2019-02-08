@@ -100,8 +100,8 @@ def shutdown():
     electronic_load.off()
     power_supply.off()
 
-def charge():
-    with open('data\\' + CHARGE_FILENAME + time_string() + '.csv', 'w') as csvfile:
+def charge(cycle_number):
+    with open('data\\' + CHARGE_FILENAME + "_" + str(cycle_number - 1) + "_" + time_string() + '.csv', 'w') as csvfile:
         csvfile.write(FIRST_DATA_LINE+',Cycle profile used:,'+config_profile+'\n')
         if USE_TIMED_CYCLE.lower() in TRUE_STRINGS:
             print('Timed charge')
@@ -109,22 +109,25 @@ def charge():
         else:
             full_charge(csvfile)
     time.sleep(CHARGE_COMPLETE_WAIT_TIME)
+    global num_lines 
+    num_lines += CHARGE_COMPLETE_WAIT_TIME / RECORD_TIME_INTERVAL
 
-def discharge():
-    with open('data\\' + DISCHARGE_FILENAME + time_string() + '.csv', 'w') as csvfile:
+def discharge(cycle_number):
+    with open('data\\' + DISCHARGE_FILENAME + "_" + str(cycle_number - 1) + "_" + time_string() + '.csv', 'w') as csvfile:
         csvfile.write(FIRST_DATA_LINE+',Cycle profile used:,'+config_profile+'\n')
         if USE_TIMED_CYCLE.lower() in TRUE_STRINGS:
-            print('Timed charge')
+            print('Timed discharge')
             timed_discharge(csvfile)
         else:
             full_discharge(csvfile)
     time.sleep(DISCHARGE_COMPLETE_WAIT_TIME)
-    
+    global num_lines 
+    num_lines += DISCHARGE_COMPLETE_WAIT_TIME / RECORD_TIME_INTERVAL
             
 power_supply = PowerSupply()
 electronic_load = ElectronicLoad()
 shutdown()
-atexit.register(shutdown)
+#atexit.register(shutdown)
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -157,14 +160,16 @@ num_lines = 0
 cycle_number = 1
 
 if CHARGE_FIRST.lower() in TRUE_STRINGS:
-    while True and NUMBER_CHARGES != cycle_number:
+    while True and NUMBER_CHARGES + 1 != cycle_number:
         cycle_number += 1
-        charge()
-        discharge()
-else:
-    while True and NUMBER_CHARGES != cycle_number:
-        cycle_number += 1
-        discharge()
-        charge()
+        charge(cycle_number)
+        discharge(cycle_number)
 
+        
+else:
+    while True and NUMBER_CHARGES + 1 != cycle_number:
+        cycle_number += 1
+        discharge(cycle_number)
+        charge(cycle_number)
+print ("Done")
 
